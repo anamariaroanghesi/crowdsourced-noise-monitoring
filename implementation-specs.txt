@@ -1,0 +1,306 @@
+Build a crowdsourced noise-pollution monitoring platform for Bucharest.
+
+The system must include:
+1. A cross-platform mobile app.
+2. A web dashboard with an interactive map.
+3. A backend API.
+4. A PostgreSQL/PostGIS database.
+5. A basic analytics/interpolation module.
+6. Gamification features for user motivation.
+
+Use the following recommended stack:
+- Mobile app: Flutter
+- Web app: React or Next.js
+- Backend: Python FastAPI
+- Database: PostgreSQL with PostGIS
+- Authentication: JWT-based authentication
+- Maps: Leaflet or Mapbox
+- Background processing: Celery or FastAPI background tasks
+- Interpolation: Python module using NumPy/SciPy
+
+Mobile app requirements:
+
+The mobile app must require users to create an account and log in before submitting measurements.
+
+The app must request microphone and location permissions.
+
+The app must measure ambient sound using the smartphone microphone.
+
+The app must not store or upload raw audio.
+
+The app must only compute and submit the estimated sound-pressure level in decibels.
+
+Each measurement must include:
+- user ID
+- device ID
+- timestamp
+- latitude
+- longitude
+- GPS accuracy
+- computed dB value
+- measurement duration
+- device model
+- operating system
+- app version
+- quality flag
+
+The app must display:
+- current measured dB value
+- color-coded noise level indicator
+- measurement status
+- user contribution history
+- personal points
+- badges
+- current level
+- streak information
+
+Noise level display:
+- Low noise: green
+- Moderate noise: yellow/orange
+- High noise: red
+
+The app must support offline behavior.
+If the user has no internet connection, measurements must be stored locally and submitted later when connection is restored.
+
+The app must include safety and privacy warnings:
+- Do not use while driving.
+- Do not enter dangerous or restricted areas.
+- The app does not record conversations.
+- Only computed dB values are uploaded.
+
+Backend requirements:
+
+Implement REST API endpoints for:
+
+Authentication:
+- POST /auth/register
+- POST /auth/login
+- GET /auth/me
+- POST /auth/logout
+
+Measurements:
+- POST /measurements
+- GET /measurements/me
+- GET /measurements/public
+- GET /measurements/statistics
+
+Map:
+- GET /map/points
+- GET /map/heatmap
+- GET /map/grid
+- GET /map/statistics
+
+Gamification:
+- GET /gamification/profile
+- GET /gamification/badges
+- GET /gamification/leaderboard
+- GET /gamification/missions
+- POST /gamification/missions/{id}/claim
+
+Admin:
+- GET /admin/measurements
+- PATCH /admin/measurements/{id}/quality
+- GET /admin/export
+- POST /admin/calibration
+
+Database tables:
+
+users:
+- id
+- email
+- password_hash
+- display_name
+- role
+- created_at
+- updated_at
+
+devices:
+- id
+- user_id
+- platform
+- model
+- os_version
+- app_version
+- calibration_offset
+- created_at
+
+measurements:
+- id
+- user_id
+- device_id
+- measured_db
+- calibrated_db
+- latitude
+- longitude
+- gps_accuracy
+- timestamp
+- duration_seconds
+- quality_flag
+- created_at
+- geom geography(Point, 4326)
+
+gamification_profiles:
+- id
+- user_id
+- total_points
+- level
+- current_streak
+- longest_streak
+- last_contribution_date
+- created_at
+- updated_at
+
+badges:
+- id
+- code
+- name
+- description
+- points_reward
+
+user_badges:
+- id
+- user_id
+- badge_id
+- awarded_at
+
+missions:
+- id
+- title
+- description
+- mission_type
+- points_reward
+- active_from
+- active_until
+- is_active
+
+user_missions:
+- id
+- user_id
+- mission_id
+- progress
+- completed_at
+- claimed_at
+
+Map visualization requirements:
+
+The default map must show recent valid measurements from the last 24 hours.
+
+If fewer than 20 valid measurements are available in the current selected area and time window, the system must display individual measurement points instead of an interpolated heatmap.
+
+If at least 20 valid measurements are available, the system may generate a heatmap using IDW interpolation.
+
+The web map must support the following filters:
+- last hour
+- last 6 hours
+- last 24 hours
+- last 7 days
+- custom time interval
+- noise level range
+- district or bounding box
+
+Optional time-of-day filters:
+- morning: 06:00–12:00
+- afternoon: 12:00–18:00
+- evening: 18:00–22:00
+- night: 22:00–06:00
+
+The system must clearly show when data density is low.
+
+Example message:
+“Insufficient measurements for reliable interpolation. Displaying raw measurement points.”
+
+Interpolation requirements:
+
+Use Inverse Distance Weighting as the main interpolation method.
+
+IDW should use:
+- only valid measurements
+- selected time interval
+- selected geographic bounding box
+- configurable search radius
+- configurable power parameter, default p = 2
+
+Kriging and Natural Neighbor interpolation are optional and should not be required for MVP.
+
+Gamification requirements:
+
+Users receive points for valid contributions.
+
+Point rules:
+- valid measurement: +10 points
+- first measurement of the day: +20 points
+- good GPS accuracy under 20 meters: +5 points
+- contribution in under-sampled area: +15 points
+- 7-day streak: +50 points
+- mission completion: configurable reward
+
+Levels:
+- Level 1: New Observer
+- Level 2: City Listener
+- Level 3: Noise Mapper
+- Level 4: Urban Guardian
+- Level 5: Expert Contributor
+
+Badges:
+- First Measurement
+- 10 Measurements
+- 100 Measurements
+- 7-Day Streak
+- 30-Day Streak
+- High Accuracy Contributor
+- District Mapper
+- Weekend Contributor
+- Night Contributor
+- Community Champion
+
+Leaderboards:
+- weekly leaderboard
+- monthly leaderboard
+- all-time leaderboard
+
+Leaderboards should rank users by quality-adjusted points, not only by number of measurements.
+
+Quality validation:
+
+Reject or flag measurements if:
+- dB value is below 20 or above 130
+- GPS accuracy is worse than 100 meters
+- coordinates are outside Bucharest
+- timestamp is invalid
+- too many measurements are submitted too quickly from the same user/device
+- repeated identical values appear suspiciously often
+
+Privacy requirements:
+
+Do not store raw audio.
+Do not upload raw audio.
+Store only computed dB values and metadata.
+Public map data must not expose email addresses or personally identifiable data.
+Use pseudonymous user IDs for public data.
+All API communication must use HTTPS.
+
+MVP priorities:
+
+Phase 1:
+- user registration/login
+- mobile measurement flow
+- submit computed dB values
+- PostgreSQL/PostGIS storage
+- web map with raw points
+- basic statistics
+- basic points system
+
+Phase 2:
+- IDW heatmap
+- badges
+- streaks
+- leaderboard
+- admin dashboard
+- data export
+
+Phase 3:
+- missions
+- calibration offsets
+- time-of-day analysis
+- improved interpolation
+- more advanced analytics
