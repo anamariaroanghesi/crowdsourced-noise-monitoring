@@ -1,6 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../models/measurement.dart';
+
+// Conditional import: on web the stub is a no-op; on native it calls sqfliteFfiInit.
+import 'sqflite_init_stub.dart'
+    if (dart.library.io) 'sqflite_init_native.dart';
 
 class StorageService {
   static Database? _db;
@@ -11,6 +16,13 @@ class StorageService {
   }
 
   Future<Database> _initDb() async {
+    if (!kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.macOS ||
+            defaultTargetPlatform == TargetPlatform.linux ||
+            defaultTargetPlatform == TargetPlatform.windows)) {
+      await initSqfliteForDesktop();
+    }
+
     final path = join(await getDatabasesPath(), 'noise_monitor.db');
     return openDatabase(
       path,
@@ -36,11 +48,13 @@ class StorageService {
   }
 
   Future<int> savePending(Measurement m) async {
+    if (kIsWeb) return -1;
     final database = await db;
     return database.insert('pending_measurements', m.toLocalDb());
   }
 
   Future<List<Map<String, dynamic>>> getPending() async {
+    if (kIsWeb) return [];
     final database = await db;
     return database.query(
       'pending_measurements',
@@ -50,6 +64,7 @@ class StorageService {
   }
 
   Future<void> markSubmitted(int localId) async {
+    if (kIsWeb) return;
     final database = await db;
     await database.update(
       'pending_measurements',
@@ -60,6 +75,7 @@ class StorageService {
   }
 
   Future<List<Map<String, dynamic>>> getAll({int limit = 50}) async {
+    if (kIsWeb) return [];
     final database = await db;
     return database.query(
       'pending_measurements',
