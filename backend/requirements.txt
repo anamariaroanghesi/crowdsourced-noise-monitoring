@@ -6,6 +6,7 @@ alembic==1.13.1
 geoalchemy2==0.15.1
 psycopg2-binary==2.9.9
 passlib[bcrypt]==1.7.4
+bcrypt==3.2.2
 python-jose[cryptography]==3.3.0
 pydantic[email]==2.7.1
 pydantic-settings==2.3.0
