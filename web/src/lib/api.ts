@@ -58,13 +58,7 @@ export const authApi = {
   },
 
   async login(email: string, password: string): Promise<TokenResponse> {
-    // OAuth2 form-encoded login
-    const params = new URLSearchParams();
-    params.append('username', email);
-    params.append('password', password);
-    const res = await api.post<TokenResponse>('/auth/login', params, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    });
+    const res = await api.post<TokenResponse>('/auth/login', { email, password });
     return res.data;
   },
 
