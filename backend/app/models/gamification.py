@@ -80,22 +80,25 @@ class UserBadge(Base):
 
 # Badge seed data — used during startup
 BADGE_SEEDS = [
-    {
-        "code": "first_measurement",
-        "name": "First Steps",
-        "description": "Submitted your very first noise measurement.",
-        "points_reward": 20,
-    },
-    {
-        "code": "measurements_10",
-        "name": "Noise Spotter",
-        "description": "Submitted 10 noise measurements.",
-        "points_reward": 50,
-    },
-    {
-        "code": "measurements_100",
-        "name": "City Ear",
-        "description": "Submitted 100 noise measurements.",
-        "points_reward": 200,
-    },
+    {"code": "first_measurement", "name": "First Steps", "description": "Submitted your very first noise measurement.", "points_reward": 20},
+    {"code": "measurements_10", "name": "Noise Spotter", "description": "Submitted 10 valid noise measurements.", "points_reward": 50},
+    {"code": "measurements_100", "name": "City Ear", "description": "Submitted 100 valid noise measurements.", "points_reward": 200},
+    {"code": "streak_7", "name": "Week Warrior", "description": "Contributed for 7 consecutive days.", "points_reward": 50},
+    {"code": "streak_30", "name": "Iron Listener", "description": "Contributed for 30 consecutive days.", "points_reward": 150},
+    {"code": "high_accuracy", "name": "Precision Mapper", "description": "Made 20 measurements with GPS accuracy under 20 m.", "points_reward": 75},
+    {"code": "district_mapper", "name": "District Explorer", "description": "Measured noise in all 6 Bucharest sectors.", "points_reward": 100},
+    {"code": "weekend_contributor", "name": "Weekend Warrior", "description": "Submitted 5 measurements on weekends.", "points_reward": 50},
+    {"code": "night_contributor", "name": "Night Owl", "description": "Submitted 5 measurements between 22:00 and 06:00.", "points_reward": 50},
+    {"code": "community_champion", "name": "Community Champion", "description": "Submitted 50+ measurements and maintained a 7-day streak.", "points_reward": 200},
 ]
+
+# Approximate Bucharest sector polygons (WGS84).
+# These are simplified boundaries used for the District Mapper badge.
+BUCHAREST_SECTOR_WKTS: dict[int, str] = {
+    1: "POLYGON((25.9610 44.4440, 26.1100 44.4440, 26.1100 44.5600, 25.9610 44.5600, 25.9610 44.4440))",
+    2: "POLYGON((26.1100 44.4340, 26.2500 44.4340, 26.2500 44.5600, 26.1100 44.5600, 26.1100 44.4340))",
+    3: "POLYGON((26.0700 44.3850, 26.2500 44.3850, 26.2500 44.4340, 26.0700 44.4340, 26.0700 44.3850))",
+    4: "POLYGON((25.9700 44.3700, 26.0700 44.3700, 26.0700 44.4100, 25.9700 44.4100, 25.9700 44.3700))",
+    5: "POLYGON((25.8800 44.3700, 25.9700 44.3700, 25.9700 44.4600, 25.8800 44.4600, 25.8800 44.3700))",
+    6: "POLYGON((25.9610 44.3950, 26.0700 44.3950, 26.0700 44.4440, 25.9610 44.4440, 25.9610 44.3950))",
+}

@@ -83,19 +83,40 @@ async def map_statistics(
     """Return aggregate statistics for visible map points in the given time window."""
     cutoff = _cutoff(time_window)
 
-    result = await db.execute(
+    # Total count (all quality flags)
+    total_result = await db.execute(
+        select(func.count(Measurement.id)).where(
+            Measurement.timestamp >= cutoff,
+        )
+    )
+    total_count = total_result.scalar_one() or 0
+
+    # Valid-only aggregates
+    agg_result = await db.execute(
         select(
             func.count(Measurement.id),
             func.avg(Measurement.measured_db),
+            func.min(Measurement.measured_db),
+            func.max(Measurement.measured_db),
+            func.percentile_cont(0.50).within_group(Measurement.measured_db.asc()),
+            func.percentile_cont(0.95).within_group(Measurement.measured_db.asc()),
         ).where(
             Measurement.quality_flag == "valid",
             Measurement.timestamp >= cutoff,
         )
     )
-    count, avg_db = result.one()
+    valid_count, avg_db, min_db, max_db, p50, p95 = agg_result.one()
+
+    def _round(v: float | None) -> float | None:
+        return round(v, 1) if v is not None else None
 
     return MapStatisticsResponse(
-        count=count or 0,
-        avg_db=round(avg_db, 2) if avg_db is not None else None,
+        valid_count=valid_count or 0,
+        total_count=total_count,
+        avg_db=_round(avg_db),
+        min_db=_round(min_db),
+        max_db=_round(max_db),
+        percentile_50=_round(p50),
+        percentile_95=_round(p95),
         time_window=time_window,
     )

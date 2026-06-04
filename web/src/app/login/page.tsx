@@ -146,6 +146,11 @@ export default function LoginPage() {
               Create one
             </Link>
           </p>
+          <p className="mt-3 text-center text-sm text-gray-400">
+            <Link href="/map" className="hover:text-gray-600 underline">
+              Browse the map without an account
+            </Link>
+          </p>
         </div>
       </div>
     </div>

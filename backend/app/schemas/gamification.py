@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -29,6 +30,7 @@ class LeaderboardEntry(BaseModel):
     rank: int
     display_name: str
     total_points: int
+    measurement_count: int = 0
     level: int
     level_name: str
 
@@ -36,3 +38,16 @@ class LeaderboardEntry(BaseModel):
 class LeaderboardResponse(BaseModel):
     period: str
     entries: list[LeaderboardEntry]
+
+
+class BadgeCatalogItem(BaseModel):
+    code: str
+    name: str
+    description: str
+    points_reward: int
+    earned: bool
+    awarded_at: Optional[datetime] = None
+
+
+class BadgeCatalogResponse(BaseModel):
+    badges: list[BadgeCatalogItem]

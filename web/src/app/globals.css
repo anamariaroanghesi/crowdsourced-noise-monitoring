@@ -10,6 +10,15 @@
   height: 100%;
 }
 
+/* Interpolation overlays */
+.interp-nearest img {
+  image-rendering: pixelated;   /* keep Voronoi cell edges sharp */
+  image-rendering: crisp-edges;
+}
+.interp-smooth img {
+  image-rendering: auto;        /* browser bilinear upscale for IDW/Kriging/Spline */
+}
+
 /* Custom scrollbar for sidebar */
 .sidebar-scroll {
   scrollbar-width: thin;

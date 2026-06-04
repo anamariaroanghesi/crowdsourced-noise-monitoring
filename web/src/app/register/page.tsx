@@ -102,7 +102,8 @@ export default function RegisterPage() {
                 htmlFor="displayName"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Display name
+                Display name{' '}
+                <span className="text-gray-400 font-normal text-xs">(shown on leaderboard)</span>
               </label>
               <input
                 id="displayName"
@@ -112,7 +113,7 @@ export default function RegisterPage() {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#e94560] focus:border-transparent transition text-gray-900 placeholder-gray-400"
-                placeholder="Your display name"
+                placeholder="e.g. Alice or NoiseMapper42"
               />
             </div>
 
@@ -177,6 +178,11 @@ export default function RegisterPage() {
               className="text-[#e94560] font-medium hover:underline"
             >
               Sign in
+            </Link>
+          </p>
+          <p className="mt-3 text-center text-sm text-gray-400">
+            <Link href="/map" className="hover:text-gray-600 underline">
+              Browse the map without an account
             </Link>
           </p>
         </div>

@@ -23,6 +23,11 @@ class MapPointsResponse(BaseModel):
 
 
 class MapStatisticsResponse(BaseModel):
-    count: int
+    valid_count: int
+    total_count: int
     avg_db: float | None
+    min_db: float | None
+    max_db: float | None
+    percentile_50: float | None
+    percentile_95: float | None
     time_window: str

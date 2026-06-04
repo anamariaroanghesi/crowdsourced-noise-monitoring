@@ -29,7 +29,7 @@ export default function Navbar() {
     clearToken();
     setLoggedIn(false);
     setDisplayName(null);
-    router.push('/login');
+    router.push('/map');
   }
 
   return (
@@ -60,11 +60,36 @@ export default function Navbar() {
 
         {/* Right: auth controls */}
         <div className="flex items-center gap-3">
+          {/* Leaderboard link — always visible */}
+          <Link
+            href="/leaderboard"
+            className="flex items-center gap-1 px-3 py-1.5 text-sm hover:text-[#e94560] transition font-medium"
+            title="Leaderboard"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 21V10M12 21V3M16 21v-7"
+              />
+            </svg>
+            <span className="hidden sm:inline">Leaderboard</span>
+          </Link>
+
           {loggedIn ? (
             <>
-              <span className="text-sm text-gray-300 hidden sm:block">
+              <Link
+                href="/account"
+                className="text-sm text-gray-300 hidden sm:block hover:text-[#e94560] transition font-medium"
+              >
                 {displayName ?? 'User'}
-              </span>
+              </Link>
               <button
                 onClick={handleLogout}
                 className="px-3 py-1.5 text-sm bg-[#0f3460] hover:bg-[#e94560] rounded-lg transition font-medium"

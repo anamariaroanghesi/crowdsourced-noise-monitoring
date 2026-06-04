@@ -5,6 +5,8 @@ import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { format } from 'date-fns';
 import type { MapPoint } from '@/types';
+import type { InterpolationMethod } from '@/lib/interpolation';
+import InterpolationLayer from './InterpolationLayer';
 
 // Fix default marker icon broken by webpack
 if (typeof window !== 'undefined') {
@@ -24,10 +26,10 @@ const BUCHAREST_CENTER: [number, number] = [44.4268, 26.1025];
 const INITIAL_ZOOM = 12;
 
 function dbColor(db: number): string {
-  if (db < 50) return '#22c55e';   // green
-  if (db < 70) return '#eab308';   // yellow
-  if (db < 85) return '#f97316';   // orange
-  return '#ef4444';                 // red
+  if (db < 50) return '#22c55e';
+  if (db < 70) return '#eab308';
+  if (db < 85) return '#f97316';
+  return '#ef4444';
 }
 
 function formatTimestamp(ts: string): string {
@@ -44,19 +46,28 @@ function qualityLabel(flag: string): string {
     suspect: 'Suspect',
     invalid: 'Invalid',
     unchecked: 'Unchecked',
+    low_accuracy: 'Low accuracy',
+    out_of_range: 'Out of range',
   };
   return labels[flag] ?? flag;
 }
 
 interface Props {
   points: MapPoint[];
+  /** 'points' = raw markers only; anything else = interpolation overlay */
+  interpolationMethod: InterpolationMethod | 'points';
 }
 
-export default function NoiseMap({ points }: Props) {
-  // Invalidate map size when points change (avoids grey tiles on first render)
+export default function NoiseMap({ points, interpolationMethod }: Props) {
   useEffect(() => {
     window.dispatchEvent(new Event('resize'));
   }, [points]);
+
+  const showOverlay = interpolationMethod !== 'points';
+  // In overlay mode markers shrink so the surface is the focus;
+  // in points mode they stay at full size.
+  const markerRadius = showOverlay ? 4 : 8;
+  const markerOpacity = showOverlay ? 0.65 : 0.75;
 
   return (
     <div className="relative w-full h-full">
@@ -71,27 +82,33 @@ export default function NoiseMap({ points }: Props) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
+        {/* Interpolation overlay — rendered below markers */}
+        {showOverlay && (
+          <InterpolationLayer
+            points={points}
+            method={interpolationMethod as InterpolationMethod}
+          />
+        )}
+
+        {/* Sample point markers — always shown for spatial reference */}
         {points.map((point) => {
           const color = dbColor(point.measured_db);
           return (
             <CircleMarker
               key={point.id}
               center={[point.latitude, point.longitude]}
-              radius={8}
+              radius={markerRadius}
               pathOptions={{
-                color: color,
+                color: '#fff',
+                weight: showOverlay ? 1 : 1.5,
                 fillColor: color,
-                fillOpacity: 0.75,
-                weight: 1.5,
+                fillOpacity: markerOpacity,
               }}
             >
               <Popup>
                 <div className="text-sm min-w-[160px]">
                   <div className="font-semibold text-base mb-1">
-                    <span
-                      style={{ color }}
-                      className="font-bold"
-                    >
+                    <span style={{ color }} className="font-bold">
                       {point.measured_db.toFixed(1)} dB
                     </span>
                   </div>

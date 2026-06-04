@@ -3,6 +3,7 @@ export interface User {
   email: string;
   display_name: string;
   role: string;
+  created_at: string;
 }
 
 export interface TokenResponse {
@@ -51,4 +52,27 @@ export interface Badge {
   name: string;
   description: string;
   awarded_at: string;
+}
+
+export interface LeaderboardEntry {
+  rank: number;
+  display_name: string;
+  total_points: number;
+  measurement_count: number;
+  level: number;
+  level_name: string;
+}
+
+export interface LeaderboardResponse {
+  period: string;
+  entries: LeaderboardEntry[];
+}
+
+export interface BadgeCatalogItem {
+  code: string;
+  name: string;
+  description: string;
+  points_reward: number;
+  earned: boolean;
+  awarded_at: string | null;
 }

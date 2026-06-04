@@ -20,7 +20,7 @@ const TIME_WINDOWS = [
 ];
 
 export default function FilterPanel({ onFilterChange }: Props) {
-  const [timeWindow, setTimeWindow] = useState('24h');
+  const [timeWindow, setTimeWindow] = useState('7d');
   const [minDb, setMinDb] = useState<string>('');
   const [maxDb, setMaxDb] = useState<string>('');
 
@@ -34,10 +34,10 @@ export default function FilterPanel({ onFilterChange }: Props) {
   }
 
   function handleReset() {
-    setTimeWindow('24h');
+    setTimeWindow('7d');
     setMinDb('');
     setMaxDb('');
-    onFilterChange({ time_window: '24h' });
+    onFilterChange({ time_window: '7d' });
   }
 
   return (

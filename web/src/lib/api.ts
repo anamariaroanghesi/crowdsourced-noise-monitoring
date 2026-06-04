@@ -6,6 +6,8 @@ import type {
   MapPointsResponse,
   Statistics,
   GamificationProfile,
+  LeaderboardResponse,
+  BadgeCatalogItem,
 } from '@/types';
 
 const api = axios.create({
@@ -34,7 +36,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       clearToken();
       if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+        window.location.href = '/map';
       }
     }
     return Promise.reject(error);
@@ -105,6 +107,18 @@ export const gamificationApi = {
   async getProfile(): Promise<GamificationProfile> {
     const res = await api.get<GamificationProfile>('/gamification/profile');
     return res.data;
+  },
+
+  async getLeaderboard(period: 'weekly' | 'monthly' | 'all_time'): Promise<LeaderboardResponse> {
+    const res = await api.get<LeaderboardResponse>('/gamification/leaderboard', {
+      params: { period },
+    });
+    return res.data;
+  },
+
+  async getBadges(): Promise<BadgeCatalogItem[]> {
+    const res = await api.get<{ badges: BadgeCatalogItem[] }>('/gamification/badges');
+    return res.data.badges;
   },
 };
 

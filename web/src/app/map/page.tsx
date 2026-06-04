@@ -8,6 +8,17 @@ import FilterPanel from '@/components/FilterPanel';
 import LegendPanel from '@/components/LegendPanel';
 import { mapApi } from '@/lib/api';
 import type { MapPoint, Statistics, MapPointsResponse } from '@/types';
+import type { InterpolationMethod } from '@/lib/interpolation';
+
+type MapMode = 'points' | InterpolationMethod;
+
+const MAP_MODES: { id: MapMode; label: string; title: string }[] = [
+  { id: 'points',  label: 'Points',   title: 'Raw sample markers' },
+  { id: 'idw',     label: 'IDW',      title: 'Inverse Distance Weighting' },
+  { id: 'kriging', label: 'Kriging',  title: 'Ordinary Kriging (spherical variogram)' },
+  { id: 'spline',  label: 'Spline',   title: 'Thin-Plate Spline' },
+  { id: 'nearest', label: 'Nearest',  title: 'Nearest Neighbour (Voronoi)' },
+];
 
 // Dynamically import the map (Leaflet requires browser APIs)
 const NoiseMap = dynamic(() => import('@/components/NoiseMap'), {
@@ -36,7 +47,8 @@ export default function MapPage() {
   const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState<Filters>({ time_window: '24h' });
+  const [filters, setFilters] = useState<Filters>({ time_window: '7d' });
+  const [mapMode, setMapMode] = useState<MapMode>('points');
 
   const fetchData = useCallback(async (f: Filters) => {
     setLoading(true);
@@ -102,6 +114,24 @@ export default function MapPage() {
               </span>
             </div>
 
+            {/* ── Interpolation mode selector ── */}
+            <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+              {MAP_MODES.map((m) => (
+                <button
+                  key={m.id}
+                  title={m.title}
+                  onClick={() => setMapMode(m.id)}
+                  className={`px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                    mapMode === m.id
+                      ? 'bg-white text-[#1a1a2e] shadow-sm'
+                      : 'text-gray-500 hover:text-gray-800'
+                  }`}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+
             {dataDensity === 'low' && !loading && (
               <div className="flex items-center gap-1.5 text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1 text-xs font-medium">
                 <svg
@@ -164,7 +194,7 @@ export default function MapPage() {
 
           {/* Map */}
           <div className="flex-1 relative">
-            <NoiseMap points={points} />
+            <NoiseMap points={points} interpolationMethod={mapMode} />
           </div>
         </div>
 
