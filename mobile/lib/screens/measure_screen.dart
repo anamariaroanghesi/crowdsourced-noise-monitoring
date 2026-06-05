@@ -3,7 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import '../config/app_config.dart';
 import '../models/measurement.dart';
 import '../services/api_service.dart';
@@ -88,11 +88,11 @@ class _MeasureScreenState extends State<MeasureScreen> {
     String? deviceModel;
     String? os;
 
-    if (Platform.isAndroid) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       final android = await deviceInfo.androidInfo;
       deviceModel = android.model;
       os = 'Android ${android.version.release}';
-    } else if (Platform.isIOS) {
+    } else if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
       final ios = await deviceInfo.iosInfo;
       deviceModel = ios.model;
       os = 'iOS ${ios.systemVersion}';
