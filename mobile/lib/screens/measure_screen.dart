@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -36,6 +35,7 @@ class _MeasureScreenState extends State<MeasureScreen> {
   double _currentDb = 0;
   String? _statusMessage;
   Measurement? _lastMeasurement;
+  int? _pointsEarned;
 
   @override
   void initState() {
@@ -113,7 +113,7 @@ class _MeasureScreenState extends State<MeasureScreen> {
     );
 
     final connectivity = await Connectivity().checkConnectivity();
-    final hasInternet = connectivity != ConnectivityResult.none;
+    final hasInternet = connectivity.any((r) => r != ConnectivityResult.none);
 
     if (hasInternet) {
       try {
@@ -121,7 +121,8 @@ class _MeasureScreenState extends State<MeasureScreen> {
         setState(() {
           _state = MeasureState.done;
           _lastMeasurement = submitted;
-          _statusMessage = 'Submitted! ${result.meanDb.toStringAsFixed(1)} dB recorded.';
+          _pointsEarned = submitted.pointsEarned;
+          _statusMessage = '${result.meanDb.toStringAsFixed(1)} dB recorded';
         });
       } catch (e) {
         await widget.storageService.savePending(measurement);
@@ -144,6 +145,7 @@ class _MeasureScreenState extends State<MeasureScreen> {
         _statusMessage = null;
         _currentDb = 0;
         _lastMeasurement = null;
+        _pointsEarned = null;
       });
 
   @override
@@ -195,6 +197,39 @@ class _MeasureScreenState extends State<MeasureScreen> {
                   _statusMessage!,
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 14, color: Colors.grey),
+                ),
+              ],
+              if (_pointsEarned != null && _pointsEarned! > 0) ...[
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1a1a2e),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.star_rounded, color: Color(0xFFe94560), size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        '+$_pointsEarned pts',
+                        style: const TextStyle(
+                          color: Color(0xFFe94560),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+              if (_pointsEarned == 0 && _state == MeasureState.done && _lastMeasurement?.qualityFlag == 'invalid') ...[
+                const SizedBox(height: 12),
+                const Text(
+                  'Measurement flagged as low quality — no points awarded.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12, color: Colors.orange),
                 ),
               ],
               const SizedBox(height: 24),

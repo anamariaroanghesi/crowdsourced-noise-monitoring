@@ -10,6 +10,7 @@ class Measurement {
   final String? operatingSystem;
   final String appVersion;
   final String? qualityFlag;
+  final int pointsEarned;
   bool submitted;
 
   Measurement({
@@ -24,6 +25,7 @@ class Measurement {
     this.operatingSystem,
     required this.appVersion,
     this.qualityFlag,
+    this.pointsEarned = 0,
     this.submitted = false,
   });
 
@@ -48,6 +50,7 @@ class Measurement {
         timestamp: DateTime.parse(json['timestamp'] as String),
         durationSeconds: (json['duration_seconds'] as num).toDouble(),
         qualityFlag: json['quality_flag'] as String?,
+        pointsEarned: (json['points_earned'] as int?) ?? 0,
         appVersion: json['app_version'] as String? ?? '1.0.0',
         submitted: true,
       );

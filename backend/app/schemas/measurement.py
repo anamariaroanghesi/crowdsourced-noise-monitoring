@@ -46,6 +46,10 @@ class MeasurementMe(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class MeasurementSubmitResponse(MeasurementMe):
+    points_earned: int = 0
+
+
 class StatisticsResponse(BaseModel):
     total_count: int
     valid_count: int

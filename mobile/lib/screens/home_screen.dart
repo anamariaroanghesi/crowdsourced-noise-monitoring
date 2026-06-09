@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../services/storage_service.dart';
+import '../services/sync_service.dart';
 import 'measure_screen.dart';
 import 'history_screen.dart';
 import 'profile_screen.dart';
@@ -24,12 +26,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-
+  late final SyncService _syncService;
   late final List<Widget> _tabs;
+  StreamSubscription? _syncSub;
 
   @override
   void initState() {
     super.initState();
+    _syncService = SyncService(widget.apiService, widget.storageService);
+    _syncService.start();
+    _syncSub = _syncService.onSyncComplete.listen(_onSyncComplete);
     _tabs = [
       MeasureScreen(
         apiService: widget.apiService,
@@ -44,6 +50,28 @@ class _HomeScreenState extends State<HomeScreen> {
         apiService: widget.apiService,
       ),
     ];
+  }
+
+  @override
+  void dispose() {
+    _syncSub?.cancel();
+    _syncService.dispose();
+    super.dispose();
+  }
+
+  void _onSyncComplete(SyncResult result) {
+    if (!mounted) return;
+    final msg = result.totalPoints > 0
+        ? '${result.synced} offline measurement${result.synced == 1 ? '' : 's'} synced · +${result.totalPoints} pts'
+        : '${result.synced} offline measurement${result.synced == 1 ? '' : 's'} synced';
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: const Color(0xFF1a1a2e),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 4),
+      ),
+    );
   }
 
   @override

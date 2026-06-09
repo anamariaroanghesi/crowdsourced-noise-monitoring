@@ -15,6 +15,7 @@ from app.schemas.measurement import (
     MeasurementCreate,
     MeasurementMe,
     MeasurementPublic,
+    MeasurementSubmitResponse,
     StatisticsResponse,
 )
 from app.services.quality import quality_service
@@ -66,7 +67,7 @@ async def _get_or_create_device(
     return device
 
 
-@router.post("", response_model=MeasurementMe, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=MeasurementSubmitResponse, status_code=status.HTTP_201_CREATED)
 async def submit_measurement(
     body: MeasurementCreate,
     current_user: User = Depends(get_current_user),
@@ -121,11 +122,15 @@ async def submit_measurement(
     await db.flush()
 
     # Award points only for valid measurements
+    points_earned = 0
     if quality_flag == "valid":
-        await gamification_service.award_points(db, current_user.id, measurement)
+        points_earned = await gamification_service.award_points(db, current_user.id, measurement)
 
     await db.flush()
-    return MeasurementMe.model_validate(measurement)
+    return MeasurementSubmitResponse(
+        **MeasurementMe.model_validate(measurement).model_dump(),
+        points_earned=points_earned,
+    )
 
 
 @router.get("/me", response_model=list[MeasurementMe])
